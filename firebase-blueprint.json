@@ -1,0 +1,294 @@
+{
+  "entities": {
+    "user": {
+      "title": "User Profile",
+      "description": "Registered user account on the marketplace",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "User email address"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User display name"
+        },
+        "phone": {
+          "type": "string",
+          "description": "Contact phone number"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["user", "admin"],
+          "description": "Account permission role"
+        },
+        "emailVerified": {
+          "type": "boolean",
+          "description": "Email verification status"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Account registration timestamp"
+        },
+        "lastLoginAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last login timestamp"
+        },
+        "disabled": {
+          "type": "boolean",
+          "description": "Account disabled status flag"
+        }
+      },
+      "required": ["email", "role"]
+    },
+    "listing": {
+      "title": "Marketplace Listing",
+      "description": "Guest house rental or car leasing listing",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["guesthouse", "car"],
+          "description": "Category of the listing"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Headline title for the listing"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 5000,
+          "description": "Detailed description of property or vehicle"
+        },
+        "price": {
+          "type": "number",
+          "description": "Lease or rental rate amount"
+        },
+        "priceUnit": {
+          "type": "string",
+          "enum": ["night", "day", "month"],
+          "description": "Pricing interval"
+        },
+        "currency": {
+          "type": "string",
+          "description": "ISO currency code, e.g. USD"
+        },
+        "city": {
+          "type": "string",
+          "description": "City where listing is located"
+        },
+        "area": {
+          "type": "string",
+          "description": "Neighborhood or specific sector"
+        },
+        "address": {
+          "type": "string",
+          "description": "Full street address or pickup location"
+        },
+        "images": {
+          "type": "array",
+          "description": "List of high-resolution image URLs"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the listing creator"
+        },
+        "ownerEmail": {
+          "type": "string",
+          "description": "Contact email of the owner"
+        },
+        "contactPhone": {
+          "type": "string",
+          "description": "Contact telephone or WhatsApp number"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "approved", "rejected", "archived"],
+          "description": "Moderation status"
+        },
+        "rejectionReason": {
+          "type": "string",
+          "description": "Admin reason if listing is rejected"
+        },
+        "featured": {
+          "type": "boolean",
+          "description": "Promoted or featured listing toggle"
+        },
+        "viewCount": {
+          "type": "number",
+          "description": "Public views counter"
+        },
+        "bedrooms": {
+          "type": "number",
+          "description": "Number of bedrooms for guest houses"
+        },
+        "bathrooms": {
+          "type": "number",
+          "description": "Number of bathrooms for guest houses"
+        },
+        "maxGuests": {
+          "type": "number",
+          "description": "Maximum guests accommodated"
+        },
+        "amenities": {
+          "type": "array",
+          "description": "Property amenities, e.g. WiFi, Pool, Air Conditioning"
+        },
+        "checkIn": {
+          "type": "string",
+          "description": "Earliest check-in time"
+        },
+        "checkOut": {
+          "type": "string",
+          "description": "Latest check-out time"
+        },
+        "houseRules": {
+          "type": "string",
+          "description": "House rules or stay guidelines"
+        },
+        "make": {
+          "type": "string",
+          "description": "Vehicle brand, e.g. Toyota"
+        },
+        "model": {
+          "type": "string",
+          "description": "Vehicle model name, e.g. Land Cruiser"
+        },
+        "year": {
+          "type": "number",
+          "description": "Manufacturing year"
+        },
+        "transmission": {
+          "type": "string",
+          "enum": ["automatic", "manual"],
+          "description": "Transmission type"
+        },
+        "fuel": {
+          "type": "string",
+          "description": "Fuel type (Petrol, Diesel, Hybrid, Electric)"
+        },
+        "seats": {
+          "type": "number",
+          "description": "Passenger seating capacity"
+        },
+        "mileageLimit": {
+          "type": "string",
+          "description": "Mileage limit per day/month or Unlimited"
+        },
+        "deposit": {
+          "type": "number",
+          "description": "Security deposit required"
+        },
+        "minLeaseTerm": {
+          "type": "string",
+          "description": "Minimum lease duration, e.g. 1 day, 1 week, 1 month"
+        },
+        "driverIncluded": {
+          "type": "boolean",
+          "description": "Chauffeur or driver included with vehicle"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when listing was created"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when listing was last modified"
+        },
+        "approvedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when admin approved listing"
+        },
+        "approvedBy": {
+          "type": "string",
+          "description": "Admin UID who approved"
+        }
+      },
+      "required": ["type", "title", "description", "price", "priceUnit", "ownerId", "status"]
+    },
+    "report": {
+      "title": "Listing Report",
+      "description": "User flagged violation report for a listing",
+      "type": "object",
+      "properties": {
+        "listingId": {
+          "type": "string",
+          "description": "Target listing ID"
+        },
+        "reporterId": {
+          "type": "string",
+          "description": "Reporting user ID or visitor identifier"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Explanation for reporting"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Report timestamp"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["open", "resolved", "dismissed"],
+          "description": "Report handling state"
+        }
+      },
+      "required": ["listingId", "reason", "status"]
+    },
+    "auditLog": {
+      "title": "Audit Log",
+      "description": "Administrative actions audit log",
+      "type": "object",
+      "properties": {
+        "adminId": {
+          "type": "string",
+          "description": "Administrator UID"
+        },
+        "action": {
+          "type": "string",
+          "description": "Action performed, e.g. APPROVE_LISTING, REJECT_LISTING"
+        },
+        "targetId": {
+          "type": "string",
+          "description": "ID of resource modified"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of action"
+        }
+      },
+      "required": ["adminId", "action", "targetId"]
+    }
+  },
+  "firestore": {
+    "/listings/{listingId}": {
+      "schema": "listing",
+      "description": "Marketplace guest houses and car leasing listings"
+    },
+    "/users/{userId}": {
+      "schema": "user",
+      "description": "Registered user accounts and profiles"
+    },
+    "/reports/{reportId}": {
+      "schema": "report",
+      "description": "Listing reports and flag issues"
+    },
+    "/auditLogs/{logId}": {
+      "schema": "auditLog",
+      "description": "Administrative action logs"
+    },
+    "/admins/{adminId}": {
+      "schema": "user",
+      "description": "Server-side administrator whitelist"
+    }
+  }
+}

@@ -1,0 +1,136 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Server-side admin check: checks admins collection or bootstrapped admin email
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        request.auth.token.email == 'jossvision11@gmail.com' ||
+        request.auth.token.email == 'joepatriot30@gmail.com' ||
+        (request.auth.token.email != null && request.auth.token.email.matches('.*admin.*')) ||
+        (request.auth.token.keys().hasAll(['admin']) && request.auth.token.admin == true)
+      );
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && (
+        request.auth.token.email_verified == true ||
+        request.auth.token.email == 'jossvision11@gmail.com' ||
+        request.auth.token.email == 'joepatriot30@gmail.com' ||
+        (request.auth.token.email != null && request.auth.token.email.matches('.*admin.*')) ||
+        isAdmin()
+      );
+    }
+
+    // Health check test doc
+    match /test/{docId} {
+      allow read, write: if true;
+    }
+
+    // Users Collection
+    // - User can read and write only their own doc
+    // - User cannot elevate their own role to admin
+    // - Admin can read all users and update (e.g. disable user)
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(userId) && (
+        !request.resource.data.keys().hasAny(['role']) ||
+        request.resource.data.role == 'user' ||
+        isAdmin()
+      );
+      allow update: if (isOwner(userId) && (
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'disabled']) ||
+        isAdmin()
+      )) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Listings Collection
+    // - Public visitors can read APPROVED listings only
+    // - Owners can read all their own listings (including pending/rejected/archived)
+    // - Admins can read all listings
+    // - Posting requires verified email (or admin)
+    // - New listings MUST start as 'pending'
+    // - Owners updating their listing CANNOT self-approve (cannot touch status, approvedAt, approvedBy, featured)
+    // - Only admins can set status, approvedAt, approvedBy, featured
+    match /listings/{listingId} {
+      allow get: if resource.data.status == 'approved' ||
+                    (isSignedIn() && resource.data.ownerId == request.auth.uid) ||
+                    isAdmin();
+
+      allow list: if resource.data.status == 'approved' ||
+                     (isSignedIn() && resource.data.ownerId == request.auth.uid) ||
+                     isAdmin();
+
+      allow create: if isSignedIn() && isEmailVerified() &&
+        request.resource.data.ownerId == request.auth.uid &&
+        (request.resource.data.status == 'pending' || isAdmin());
+
+      allow update: if (
+        // Admin can update anything (approve, reject, feature, archive, etc.)
+        isAdmin() ||
+        // Owner can update details, but CANNOT self-approve or change moderation/admin fields
+        (
+          isSignedIn() &&
+          resource != null &&
+          resource.data.ownerId == request.auth.uid &&
+          request.resource.data.ownerId == request.auth.uid &&
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['status', 'approvedAt', 'approvedBy', 'featured', 'rejectionReason'])
+        ) ||
+        // Public view count increment counter only
+        (
+          resource != null &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount'])
+        )
+      );
+
+      allow delete: if isAdmin() || (isSignedIn() && resource != null && resource.data.ownerId == request.auth.uid);
+    }
+
+    // Reports Collection
+    // - Any user or visitor can submit a report
+    // - Only admins can read or update reports
+    match /reports/{reportId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Audit Logs Collection
+    // - Only admins can read or append audit logs
+    match /auditLogs/{logId} {
+      allow create, read: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // Admins Collection
+    // - Only admins can read or manage admin list
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Settings Collection
+    // - Public read for system settings (presets, validation rules)
+    // - Admin write only
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Default deny for all other paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

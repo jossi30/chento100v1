@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #f8fafc;
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Custom sleek scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Slick Swiper navigation controls */
+.swiper-button-next,
+.swiper-button-prev {
+  color: #ffffff !important;
+  background: rgba(15, 23, 42, 0.6) !important;
+  backdrop-filter: blur(8px) !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 9999px !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.swiper-button-next:after,
+.swiper-button-prev:after {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  background: rgba(15, 23, 42, 0.85) !important;
+  transform: scale(1.08) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.swiper-button-next:active,
+.swiper-button-prev:active {
+  transform: scale(0.96) !important;
+}
+
+/* Hero Offers Slideshow Pagination */
+.hero-offers-swiper .swiper-pagination {
+  bottom: 80px !important;
+  z-index: 5 !important;
+}
+
+@media (max-width: 640px) {
+  .hero-offers-swiper .swiper-pagination {
+    bottom: 24px !important;
+  }
+}
+
+.hero-offers-swiper .swiper-pagination-bullet {
+  background: rgba(255, 255, 255, 0.6) !important;
+  width: 8px !important;
+  height: 8px !important;
+  opacity: 0.7 !important;
+  transition: all 0.3s ease !important;
+}
+
+.hero-offers-swiper .swiper-pagination-bullet-active {
+  background: #f59e0b !important;
+  width: 24px !important;
+  border-radius: 9999px !important;
+  opacity: 1 !important;
+}
+
+/* Accessibility: respect user prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

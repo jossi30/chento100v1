@@ -1,0 +1,10 @@
+{
+  "name": "chento 100",
+  "description": "Boutique guest house rentals and private car & driver services with real-time admin moderation and bilingual support.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
