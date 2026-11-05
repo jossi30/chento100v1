@@ -1065,7 +1065,7 @@ export default function Home() {
                   SK
                 </div>
                 <div>
-                  <h4 className='text-xs font-semibold text-neutral-900'>Sarah K.</h4>
+                  <h4 className='text-xs font-semibold text-neutral-900'>Sofia K.</h4>
                   <p className='text-[11px] text-neutral-500'>Stockholm, Sweden · Family Guest Stay</p>
                 </div>
               </div>

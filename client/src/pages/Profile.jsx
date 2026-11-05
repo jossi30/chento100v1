@@ -1039,7 +1039,7 @@ export default function Profile() {
                   type='text'
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder='e.g. Sarah Jenkins'
+                  placeholder='e.g. Alexander Host'
                   className='w-full pl-9 pr-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-slate-900'
                 />
               </div>

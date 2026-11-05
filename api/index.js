@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import fs from 'fs';
-import { exec } from 'child_process';
+import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import userRouter from './routes/user.route.js';
 import authRouter from './routes/auth.route.js';
@@ -19,16 +19,15 @@ const rootDir = path.resolve(__dirname, '..');
 const clientDist = path.join(rootDir, 'client', 'dist');
 const adminDist = path.join(rootDir, 'admin-app', 'dist');
 
-// Non-blocking build check to prevent delaying port binding during dev startup
+// Ensure dist artifacts exist before mounting routes
 if (!fs.existsSync(clientDist) || !fs.existsSync(adminDist)) {
-  console.log('[Backend] Dist artifacts missing; triggering background build...');
-  exec('npm run build', { cwd: rootDir }, (err) => {
-    if (err) {
-      console.warn('[Backend] Background build warning:', err.message);
-    } else {
-      console.log('[Backend] Background build completed.');
-    }
-  });
+  console.log('[Backend] Dist artifacts missing; triggering build...');
+  try {
+    execSync('npm run build', { cwd: rootDir, stdio: 'inherit' });
+    console.log('[Backend] Build completed successfully.');
+  } catch (err) {
+    console.warn('[Backend] Build warning:', err.message);
+  }
 }
 
 const app = express();
@@ -101,15 +100,14 @@ app.use((err, req, res, _next) => {
 });
 
 // Serve Admin App at /admin
-if (fs.existsSync(adminDist)) {
-  app.use('/admin', express.static(adminDist));
-  app.get('/admin', (_req, res) => {
-    res.sendFile(path.join(adminDist, 'index.html'));
-  });
-  app.get('/admin/*', (_req, res) => {
-    res.sendFile(path.join(adminDist, 'index.html'));
-  });
-}
+app.use('/admin', express.static(adminDist));
+app.get(['/admin', '/admin/*'], (_req, res) => {
+  const adminIndexHtml = path.join(adminDist, 'index.html');
+  if (fs.existsSync(adminIndexHtml)) {
+    return res.sendFile(adminIndexHtml);
+  }
+  return res.status(200).send(`<!DOCTYPE html><html><head><meta http-equiv="refresh" content="2"><title>Loading Chento Admin...</title><style>body{font-family:system-ui,-apple-system,sans-serif;background:#0f172a;color:#f8fafc;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;}</style></head><body><div style="text-align:center"><h2 style="font-size:24px;margin-bottom:8px">Loading Chento Admin...</h2></div></body></html>`);
+});
 
 // Serve Client App at root (with SPA fallback)
 app.use(express.static(clientDist));

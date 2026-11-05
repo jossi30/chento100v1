@@ -17,33 +17,7 @@ import { apiFetch } from '../services/apiFetch';
 
 const AuthContext = createContext(null);
 
-export const DEMO_ACCOUNTS = {
-  host: {
-    email: 'demo.host@chento100.com',
-    password: 'password123',
-    displayName: 'Alexander (Demo Host)',
-    phone: '+291 7 888 999',
-    role: 'host',
-    accountType: 'host',
-    hostType: 'both',
-  },
-  admin: {
-    email: 'admin@chento100.com',
-    password: 'password123',
-    displayName: 'Chento Admin',
-    phone: '+1 800-555-0100',
-    role: 'admin',
-    accountType: 'admin',
-  },
-  guest: {
-    email: 'demo.traveler@chento100.com',
-    password: 'password123',
-    displayName: 'Sarah (Demo Traveler)',
-    phone: '+1 305-555-1234',
-    role: 'user',
-    accountType: 'user',
-  },
-};
+export const DEMO_ACCOUNTS = {};
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
@@ -289,25 +263,9 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Quick Demo Account Sign-In (Customer Guest by default)
-  const loginDemo = async (accountType = 'guest') => {
-    try {
-      const res = await apiFetch('/api/auth/demo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: accountType }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.token && data.user) {
-          return handleBackendSession(data.token, data.user);
-        }
-      }
-    } catch (e) {
-      console.warn('Demo API route fallback:', e);
-    }
-    const demo = DEMO_ACCOUNTS[accountType] || DEMO_ACCOUNTS.guest;
-    return signIn(demo.email, demo.password);
+  // Demo accounts disabled
+  const loginDemo = async () => {
+    throw new Error('Demo accounts have been disabled.');
   };
 
   // Resend verification email

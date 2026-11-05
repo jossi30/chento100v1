@@ -223,13 +223,7 @@ export default function Header() {
                   />
                 </Link>
               </div>
-            ) : (
-              <Link to='/sign-in' className='flex items-center'>
-                <span className='text-white bg-black hover:bg-neutral-800 font-bold text-xs px-3.5 py-1.5 rounded-full shadow-xs transition'>
-                  {t('header.signIn')}
-                </span>
-              </Link>
-            )}
+            ) : null}
           </ul>
 
           {/* Mobile Right Controls: Hamburger Toggle & Quick Dashboard */}
@@ -245,14 +239,7 @@ export default function Header() {
                   alt='profile'
                 />
               </Link>
-            ) : (
-              <Link
-                to='/sign-in'
-                className='px-3 py-1 bg-black text-white text-xs font-bold rounded-full shadow-xs'
-              >
-                {t('header.signIn')}
-              </Link>
-            )}
+            ) : null}
 
             <button
               type='button'
@@ -352,22 +339,6 @@ export default function Header() {
                 <p className='text-[11px] text-slate-500 leading-relaxed'>
                   {t('header.welcomeDesc')}
                 </p>
-                <div className='grid grid-cols-2 gap-2 pt-1'>
-                  <Link
-                    to='/sign-in'
-                    onClick={() => setMobileMenuOpen(false)}
-                    className='py-2 px-3 text-center bg-black text-white rounded-xl text-xs font-bold hover:bg-neutral-800 transition shadow-xs'
-                  >
-                    {t('header.signIn')}
-                  </Link>
-                  <Link
-                    to='/sign-up'
-                    onClick={() => setMobileMenuOpen(false)}
-                    className='py-2 px-3 text-center bg-black text-white rounded-xl text-xs font-bold hover:bg-neutral-800 transition shadow-xs'
-                  >
-                    {t('header.register')}
-                  </Link>
-                </div>
               </div>
             )}
           </div>

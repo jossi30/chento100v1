@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth, DEMO_ACCOUNTS } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import {
   getUserListings,
   createListing,
@@ -41,17 +41,16 @@ import {
 } from 'react-icons/fa';
 
 export default function Partner() {
-  const { currentUser, userProfile, signUp, signIn, signInWithGoogle, updateUser, loginDemo, logOut } = useAuth();
+  const { currentUser, userProfile, signUp, signIn, signInWithGoogle, updateUser, logOut } = useAuth();
   const navigate = useNavigate();
 
   const effectiveUser = useMemo(() => {
     return (
       currentUser || {
-        ...DEMO_ACCOUNTS?.guest,
-        displayName: 'Sarah (Demo Traveler)',
-        email: 'demo.traveler@chento100.com',
-        phone: '+1 305-555-1234',
-        uid: 'demo_traveler_guest',
+        displayName: 'Partner Host',
+        email: 'partner@chento100.com',
+        phone: '+291 7 888 999',
+        uid: '',
         role: 'host',
         accountType: 'host',
       }
@@ -142,27 +141,34 @@ export default function Partner() {
 
   // Load Host Listings when signed in
   const loadHostListings = useCallback(async () => {
-    if (!effectiveUser?.uid) return;
+    if (!currentUser?.uid) {
+      setListings([]);
+      return;
+    }
     setLoadingListings(true);
     try {
-      const data = await getUserListings(effectiveUser.uid);
+      const data = await getUserListings(currentUser.uid);
       setListings(data || []);
     } catch (err) {
       console.warn('Error loading host listings:', err.message);
     } finally {
       setLoadingListings(false);
     }
-  }, [effectiveUser?.uid]);
+  }, [currentUser?.uid]);
 
   useEffect(() => {
-    loadHostListings();
+    if (currentUser?.uid) {
+      loadHostListings();
+    } else {
+      setListings([]);
+    }
     if (effectiveUser?.displayName) {
       setCarForm((prev) => ({ ...prev, driverName: effectiveUser.displayName }));
     }
     if (effectiveUser?.phone) {
       setCarForm((prev) => ({ ...prev, driverContact: effectiveUser.phone }));
     }
-  }, [effectiveUser, loadHostListings]);
+  }, [currentUser, effectiveUser, loadHostListings]);
 
   // Handle Host Registration
   const handleRegisterSubmit = async (e) => {
@@ -237,23 +243,6 @@ export default function Partner() {
       if (err.code !== 'auth/popup-closed-by-user') {
         setAuthError(err.message || 'Google sign in failed.');
       }
-    } finally {
-      setAuthLoading(false);
-    }
-  };
-
-  // Quick Demo Host Sign In for Development
-  const handleDemoSignIn = async () => {
-    setAuthError('');
-    setAuthLoading(true);
-    try {
-      await loginDemo('host');
-      showToast('⚡ Signed in with Demo Host Account! Welcome to the Partner Portal.');
-      setShowAuthModal(false);
-      setPortalTab('listings');
-    } catch (err) {
-      console.error('Demo sign in error:', err);
-      setAuthError(err.message || 'Failed to sign in with demo account.');
     } finally {
       setAuthLoading(false);
     }
@@ -1132,28 +1121,6 @@ export default function Partner() {
                     </button>
                   </form>
                 )}
-
-                {/* Development Quick Demo Account Sign-In */}
-                <div className='p-4 bg-neutral-50 rounded-2xl border border-neutral-200 space-y-2.5 mt-4'>
-                  <div className='flex items-center justify-between text-xs'>
-                    <span className='font-bold text-neutral-800 flex items-center gap-1.5'>
-                      <span className='text-amber-500 font-extrabold'>⚡</span>
-                      <span>Development Quick Demo</span>
-                    </span>
-                    <button
-                      type='button'
-                      onClick={handleDemoSignIn}
-                      disabled={authLoading}
-                      className='px-3 py-1 bg-black hover:bg-neutral-800 text-white font-bold rounded-lg text-xs transition shadow-xs cursor-pointer'
-                    >
-                      1-Click Host Sign In
-                    </button>
-                  </div>
-                  <div className='bg-white p-2.5 rounded-xl text-[11px] font-mono text-neutral-600 border border-neutral-200 flex flex-col gap-0.5'>
-                    <div>Email: <span className='text-neutral-950 font-bold'>demo.host@chento100.com</span></div>
-                    <div>Password: <span className='text-neutral-950 font-bold'>password123</span></div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -1168,12 +1135,12 @@ export default function Partner() {
           <div className='bg-white rounded-3xl border border-neutral-200/90 p-6 sm:p-7 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6'>
             <div className='flex items-center gap-4'>
               <div className='w-14 h-14 rounded-2xl bg-black text-white flex items-center justify-center text-2xl font-bold shadow-sm shrink-0'>
-                {(effectiveUser.displayName || effectiveUser.email || 'S')[0].toUpperCase()}
+                {(effectiveUser.displayName || effectiveUser.email || 'P')[0].toUpperCase()}
               </div>
               <div className='space-y-1.5'>
                 <div className='flex items-center gap-2.5 flex-wrap'>
                   <h2 className='text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight'>
-                    {effectiveUser.displayName || 'Sarah (Demo Traveler)'}
+                    {effectiveUser.displayName || 'Partner Host'}
                   </h2>
                   <span className='px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#d1fae5] text-[#065f46] flex items-center gap-1.5 tracking-wide'>
                     <FaCheckCircle className='text-[11px] text-[#059669]' />
@@ -1183,11 +1150,11 @@ export default function Partner() {
                 <div className='flex items-center gap-4 text-xs text-neutral-500 flex-wrap'>
                   <span className='flex items-center gap-1.5'>
                     <FaEnvelope className='text-neutral-400 text-xs' />
-                    <span>{effectiveUser.email || 'demo.traveler@chento100.com'}</span>
+                    <span>{effectiveUser.email || 'partner@chento100.com'}</span>
                   </span>
                   <span className='flex items-center gap-1.5'>
                     <FaPhoneAlt className='text-neutral-400 text-xs' />
-                    <span>{effectiveUser.phone || userProfile?.phone || '+1 305-555-1234'}</span>
+                    <span>{effectiveUser.phone || userProfile?.phone || '+291 7 888 999'}</span>
                   </span>
                   {currentUser ? (
                     <button

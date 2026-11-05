@@ -13,7 +13,7 @@ export default function AdminRoute() {
   }
 
   if (!firebaseUser) {
-    return <Navigate to='/sign-in' replace />;
+    return <Navigate to='/' replace />;
   }
 
   return authIsAdmin ? <Outlet /> : <Navigate to='/' replace />;

@@ -178,7 +178,7 @@ export default function AdminDashboard() {
       if (elapsedMinutes >= 30) {
         clearInterval(interval);
         logOut().finally(() => {
-          navigate('/sign-in', { replace: true, state: { sessionExpired: true } });
+          navigate('/', { replace: true, state: { sessionExpired: true } });
         });
       }
     }, 60000); // Check once per minute
@@ -1152,7 +1152,7 @@ export default function AdminDashboard() {
           setIsMobileOpen={setIsMobileSidebarOpen}
           onSignOut={() => {
             if (window.confirm('Sign out of Administrator Console?')) {
-              logOut().then(() => navigate('/sign-in'));
+              logOut().then(() => navigate('/'));
             }
           }}
           currentUser={currentUser}

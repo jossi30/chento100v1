@@ -346,8 +346,8 @@ export async function createListing(listingData, user) {
       : Array.isArray(listingData.images)
       ? listingData.images
       : []).slice(0, 10),
-    ownerId: user.uid || user._id || user.id || 'user_demo',
-    userRef: user.uid || user._id || user.id || 'user_demo',
+    ownerId: user.uid || user._id || user.id || 'user_partner',
+    userRef: user.uid || user._id || user.id || 'user_partner',
     ownerEmail: user.email || '',
     contactPhone: listingData.contactPhone?.trim() || '',
     status: 'pending', // Rule 4: Every new listing is created with status "pending"

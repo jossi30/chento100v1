@@ -69,6 +69,14 @@ export const deleteUser = async (req, res, next) => {
 
 export const getUserListings = async (req, res, next) => {
   try {
+    if (!req.user) {
+      const listings = await firebaseStore.getListings({
+        userRef: req.params.id,
+        limit: '500',
+      });
+      return res.status(200).json(listings || []);
+    }
+
     const isSelf = req.user.id === req.params.id || req.user.uid === req.params.id || req.user._id === req.params.id;
     if (!isSelf && !req.user.isAdmin) {
       return next(errorHandler(403, 'You can only view your own listings.'));

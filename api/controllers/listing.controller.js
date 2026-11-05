@@ -7,7 +7,7 @@ export const createListing = async (req, res, next) => {
   try {
     const admin = isAdmin(req.user);
     const status = admin && req.body.status === 'approved' ? 'approved' : 'pending';
-    const userId = req.user?.id || req.user?.uid || req.user?._id || 'user_demo';
+    const userId = req.user?.id || req.user?.uid || req.user?._id || 'user_guest';
     const listing = await firebaseStore.createListing({
       ...req.body,
       status,

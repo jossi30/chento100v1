@@ -1,10 +1,6 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import Home from './pages/Home';
-import SignIn from './pages/SignIn';
-import SignUp from './pages/SignUp';
-import ForgotPassword from './pages/ForgotPassword';
-import VerifyEmail from './pages/VerifyEmail';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Terms from './pages/Terms';
@@ -38,10 +34,10 @@ function AppRoutes() {
     <main key={location.pathname} className='animate-fadeInUp min-h-[calc(100vh-76px)]'>
       <Routes location={location}>
         <Route path='/' element={<Home />} />
-        <Route path='/sign-in' element={<SignIn />} />
-        <Route path='/sign-up' element={<SignUp />} />
-        <Route path='/forgot-password' element={<ForgotPassword />} />
-        <Route path='/verify-email' element={<VerifyEmail />} />
+        <Route path='/sign-in' element={<Navigate to='/' replace />} />
+        <Route path='/sign-up' element={<Navigate to='/' replace />} />
+        <Route path='/forgot-password' element={<Navigate to='/' replace />} />
+        <Route path='/verify-email' element={<Navigate to='/' replace />} />
         <Route path='/about' element={<About />} />
         <Route path='/contact' element={<Contact />} />
         <Route path='/terms' element={<Terms />} />

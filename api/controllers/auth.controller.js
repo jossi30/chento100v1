@@ -24,50 +24,6 @@ const publicUser = (user) => {
   };
 };
 
-const DEMO_PROFILES = {
-  admin: {
-    _id: 'user_admin_demo',
-    email: 'admin@chento100.com',
-    displayName: 'Chento Admin',
-    name: 'Chento Admin',
-    role: 'admin',
-    accountType: 'admin',
-    isAdmin: true,
-    emailVerified: true,
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=300&q=80',
-    phone: '+1 800-555-0100',
-    phoneNumber: '+1 800-555-0100',
-  },
-  host: {
-    _id: 'host_demo_001',
-    email: 'demo.host@chento100.com',
-    displayName: 'Alexander (Demo Host)',
-    name: 'Alexander (Demo Host)',
-    role: 'host',
-    accountType: 'host',
-    hostType: 'both',
-    isAdmin: false,
-    emailVerified: true,
-    businessName: 'Makindye Sunset Guest Houses & Fleet',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
-    phone: '+291 7 888 999',
-    phoneNumber: '+291 7 888 999',
-  },
-  guest: {
-    _id: 'guest_demo_001',
-    email: 'demo.traveler@chento100.com',
-    displayName: 'Sarah (Demo Traveler)',
-    name: 'Sarah (Demo Traveler)',
-    role: 'user',
-    accountType: 'user',
-    isAdmin: false,
-    emailVerified: true,
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
-    phone: '+1 305-555-1234',
-    phoneNumber: '+1 305-555-1234',
-  },
-};
-
 const createTokenAndRespond = (user, res) => {
   const isAdmin = Boolean(user.isAdmin || user.role === 'admin' || isConfiguredAdmin(user.email));
   const uid = String(user._id || user.id || user.uid);
@@ -177,30 +133,13 @@ export const signup = async (req, res, next) => {
 
 export const signin = async (req, res, next) => {
   try {
-    const { email, password, role } = req.body;
-
-    // Handle demo account sign-in
-    if (role && DEMO_PROFILES[role]) {
-      const demoUser = DEMO_PROFILES[role];
-      const existing = await firebaseStore.getUserByEmail(demoUser.email);
-      const user = existing || (await firebaseStore.createUser(demoUser._id, demoUser));
-      return createTokenAndRespond(user, res);
-    }
+    const { email, password } = req.body;
 
     if (!email || !password) {
       return next(errorHandler(400, 'Email and password are required.'));
     }
 
     const cleanEmail = email.trim().toLowerCase();
-
-    // Check pre-configured demo credentials
-    for (const [key, demo] of Object.entries(DEMO_PROFILES)) {
-      if (cleanEmail === demo.email.toLowerCase() && (password === 'password123' || password === 'admin123')) {
-        const existing = await firebaseStore.getUserByEmail(demo.email);
-        const user = existing || (await firebaseStore.createUser(demo._id, demo));
-        return createTokenAndRespond(user, res);
-      }
-    }
 
     // Check runtime admin email
     if (cleanEmail === 'joepatriot30@gmail.com' && (password === 'password123' || password === 'admin123')) {
@@ -226,7 +165,7 @@ export const signin = async (req, res, next) => {
 
     if (user.password) {
       const isMatch = bcryptjs.compareSync(password, user.password);
-      if (!isMatch && password !== 'password123') {
+      if (!isMatch) {
         return next(errorHandler(401, 'Invalid email or password.'));
       }
     }
@@ -237,16 +176,8 @@ export const signin = async (req, res, next) => {
   }
 };
 
-export const demoLogin = async (req, res, next) => {
-  try {
-    const role = String(req.body.role || req.query.role || 'host').toLowerCase();
-    const demo = DEMO_PROFILES[role] || DEMO_PROFILES.host;
-    const existing = await firebaseStore.getUserByEmail(demo.email);
-    const user = existing || (await firebaseStore.createUser(demo._id, demo));
-    return createTokenAndRespond(user, res);
-  } catch (error) {
-    return next(error);
-  }
+export const demoLogin = async (_req, res) => {
+  return res.status(403).json({ success: false, message: 'Demo accounts have been disabled.' });
 };
 
 export const google = async (req, res, next) => {
