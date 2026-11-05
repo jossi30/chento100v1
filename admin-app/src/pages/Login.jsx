@@ -10,7 +10,7 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const { login, isAuthenticated } = useAuth();
+  const { login, loginDemo, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -31,6 +31,20 @@ export default function Login() {
       [e.target.id]: e.target.value,
     }));
     if (errorMessage) setErrorMessage('');
+  };
+
+  const handleDemoAdminLogin = async () => {
+    setSubmitting(true);
+    setErrorMessage('');
+    try {
+      await loginDemo('admin');
+      const destination = location.state?.from?.pathname || targetDashboard;
+      navigate(destination, { replace: true });
+    } catch (err) {
+      setErrorMessage(err.message || 'Demo Admin login failed.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -94,6 +108,40 @@ export default function Login() {
               <span>{errorMessage}</span>
             </div>
           )}
+
+          {/* 1-Click Demo Testing Sign In */}
+          <div className='mb-6 p-4 rounded-xl bg-amber-50/90 border border-amber-200 text-center shadow-xs'>
+            <div className='flex items-center justify-between mb-2'>
+              <span className='text-[11px] font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5'>
+                <span className='w-2 h-2 rounded-full bg-emerald-500 animate-pulse'></span>
+                Demo Testing Mode
+              </span>
+              <span className='text-[10px] bg-amber-200 text-amber-900 font-semibold px-2 py-0.5 rounded-full'>
+                Platform Admin
+              </span>
+            </div>
+            <p className='text-xs text-amber-900/80 mb-3 text-left leading-relaxed'>
+              Instant 1-click access for evaluation and administration testing without passwords. Logs in as administrator <strong className='font-bold text-amber-950'>Joe Patriot</strong>.
+            </p>
+            <button
+              type='button'
+              id='demo-admin-btn'
+              disabled={submitting}
+              onClick={handleDemoAdminLogin}
+              className='w-full py-2.5 px-4 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-bold rounded-lg text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-xs cursor-pointer disabled:opacity-50'
+            >
+              <span>🛡️</span>
+              <span>1-Click Demo Admin Sign In</span>
+            </button>
+          </div>
+
+          <div className='relative flex items-center justify-center mb-5'>
+            <div className='border-t border-slate-200 w-full' />
+            <span className='bg-white px-3 text-[10px] text-slate-400 font-semibold uppercase tracking-wider shrink-0'>
+              or sign in with credentials
+            </span>
+            <div className='border-t border-slate-200 w-full' />
+          </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className='flex flex-col gap-5'>

@@ -110,6 +110,28 @@ export const AuthProvider = ({ children }) => {
     return unsubscribe;
   }, []);
 
+  const loginDemo = async (role = 'admin') => {
+    setError(null);
+    try {
+      const res = await apiFetch('/api/auth/demo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.token || !data.user) {
+        throw new Error(data.message || 'Demo sign in failed.');
+      }
+      localStorage.setItem('admin_token', data.token);
+      localStorage.setItem('admin_user', JSON.stringify(data.user));
+      setUser(data.user);
+      return data.user;
+    } catch (authError) {
+      setError(authError.message || 'Demo authentication failed.');
+      throw authError;
+    }
+  };
+
   const login = async (email, password) => {
     setError(null);
     try {
@@ -146,6 +168,7 @@ export const AuthProvider = ({ children }) => {
         error,
         setError,
         login,
+        loginDemo,
         logout,
         checkAuth,
       }}

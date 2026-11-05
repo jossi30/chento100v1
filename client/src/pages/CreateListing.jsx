@@ -294,19 +294,13 @@ export default function CreateListing() {
       {/* Top Banner Navigation */}
       <div className='flex items-center justify-between mb-4'>
         <Link
-          to='/profile'
+          to='/partner'
           className='inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition'
         >
           <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
             <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 19l-7-7 7-7' />
           </svg>
-          Back to Profile
-        </Link>
-        <Link
-          to='/partner'
-          className='inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100/80 px-2.5 py-1 rounded-lg border border-amber-200 transition'
-        >
-          Partner Portal &amp; Calendar Availability →
+          Back to Partner Dashboard
         </Link>
       </div>
 
@@ -371,10 +365,10 @@ export default function CreateListing() {
                   Preview Listing
                 </Link>
                 <Link
-                  to='/profile'
+                  to='/partner'
                   className='px-5 py-2.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 text-sm font-medium rounded-lg shadow-sm transition'
                 >
-                  Go to My Listings
+                  Go to Partner Dashboard
                 </Link>
                 <button
                   type='button'

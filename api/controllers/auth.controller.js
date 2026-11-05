@@ -103,7 +103,20 @@ export const signup = async (req, res, next) => {
     const cleanEmail = email.trim().toLowerCase();
     const existing = await firebaseStore.getUserByEmail(cleanEmail);
     if (existing) {
-      return next(errorHandler(409, 'An account with this email address already exists.'));
+      if (existing.password && bcryptjs.compareSync(password, existing.password)) {
+        const updates = {};
+        if (role === 'host' || req.body.accountType === 'host') {
+          updates.role = 'host';
+          updates.accountType = 'host';
+        }
+        if (displayName && !existing.displayName) updates.displayName = displayName;
+        if (phone && !existing.phone) updates.phone = phone;
+        const updated = Object.keys(updates).length > 0
+          ? await firebaseStore.updateUser(existing._id || existing.id, updates)
+          : existing;
+        return createTokenAndRespond(updated, res);
+      }
+      return next(errorHandler(409, 'An account with this email address already exists. Please sign in instead.'));
     }
 
     const id = `user_${Date.now()}`;
@@ -176,8 +189,89 @@ export const signin = async (req, res, next) => {
   }
 };
 
-export const demoLogin = async (_req, res) => {
-  return res.status(403).json({ success: false, message: 'Demo accounts have been disabled.' });
+export const demoLogin = async (req, res, next) => {
+  try {
+    const rawRole = String(req.body?.role || req.query?.role || 'partner').toLowerCase();
+    const isAdminRequested = rawRole === 'admin';
+    const isTravelerRequested = rawRole === 'traveler' || rawRole === 'guest' || rawRole === 'user';
+
+    if (isAdminRequested) {
+      const email = 'joepatriot30@gmail.com';
+      const existing = await firebaseStore.getUserByEmail(email);
+      const adminUser = existing ? {
+        ...existing,
+        role: 'admin',
+        isAdmin: true,
+        accountType: 'admin',
+      } : (await firebaseStore.createUser('user_joe_001', {
+        _id: 'user_joe_001',
+        id: 'user_joe_001',
+        email,
+        displayName: 'Joe Patriot (Admin)',
+        role: 'admin',
+        isAdmin: true,
+        accountType: 'admin',
+        emailVerified: true,
+        phone: '+1 202-555-0149',
+        phoneNumber: '+1 202-555-0149',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+      }));
+      return createTokenAndRespond(adminUser, res);
+    }
+
+    if (isTravelerRequested) {
+      const email = 'demo.traveler@chento100.com';
+      const existing = await firebaseStore.getUserByEmail(email);
+      const travelerUser = existing ? {
+        ...existing,
+        role: 'user',
+        isAdmin: false,
+        accountType: 'user',
+      } : (await firebaseStore.createUser('user_sarah_001', {
+        _id: 'user_sarah_001',
+        id: 'user_sarah_001',
+        email,
+        displayName: 'Sarah (Demo Traveler)',
+        role: 'user',
+        isAdmin: false,
+        accountType: 'user',
+        emailVerified: true,
+        phone: '+1 305-555-1234',
+        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+      }));
+      return createTokenAndRespond(travelerUser, res);
+    }
+
+    // Default: 'partner' / 'host'
+    const email = 'alexander.vance@chento100.com';
+    const existing = await firebaseStore.getUserByEmail(email);
+    const hostUser = existing ? {
+      ...existing,
+      role: 'host',
+      isAdmin: false,
+      accountType: 'host',
+      verified: true,
+    } : (await firebaseStore.createUser('host_alexander_001', {
+      _id: 'host_alexander_001',
+      id: 'host_alexander_001',
+      email,
+      displayName: 'Alexander Vance (Partner Host)',
+      role: 'host',
+      isAdmin: false,
+      accountType: 'host',
+      hostType: 'both',
+      serviceCategory: 'both',
+      businessName: 'Makindye Sunset Guest Houses & Fleet',
+      verified: true,
+      emailVerified: true,
+      phone: '+291 7 888 999',
+      phoneNumber: '+291 7 888 999',
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
+    }));
+    return createTokenAndRespond(hostUser, res);
+  } catch (error) {
+    return next(error);
+  }
 };
 
 export const google = async (req, res, next) => {

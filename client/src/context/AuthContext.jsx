@@ -263,9 +263,18 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Demo accounts disabled
-  const loginDemo = async () => {
-    throw new Error('Demo accounts have been disabled.');
+  // 1-Click Demo Testing sign in for Partner and Admin
+  const loginDemo = async (role = 'partner') => {
+    const res = await apiFetch('/api/auth/demo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.token || !data.user) {
+      throw new Error(data.message || 'Demo sign in failed.');
+    }
+    return handleBackendSession(data.token, data.user);
   };
 
   // Resend verification email

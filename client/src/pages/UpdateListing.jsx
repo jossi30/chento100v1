@@ -317,13 +317,13 @@ export default function UpdateListing() {
       {/* Top Banner Navigation */}
       <div className='flex items-center justify-between mb-4'>
         <Link
-          to='/profile'
+          to='/partner'
           className='inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition'
         >
           <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
             <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 19l-7-7 7-7' />
           </svg>
-          Back to Profile
+          Back to Partner Dashboard
         </Link>
         <Link
           to={`/listing/${listingId}`}
@@ -343,10 +343,10 @@ export default function UpdateListing() {
           </div>
           <button
             type='button'
-            onClick={() => navigate('/profile')}
+            onClick={() => navigate('/partner')}
             className='underline text-emerald-900 font-bold hover:text-emerald-950 cursor-pointer'
           >
-            Go to My Listings
+            Go to Partner Dashboard
           </button>
         </div>
       )}

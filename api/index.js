@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import fs from 'fs';
-import { execSync } from 'child_process';
+import { exec } from 'child_process';
 import { fileURLToPath } from 'url';
 import userRouter from './routes/user.route.js';
 import authRouter from './routes/auth.route.js';
@@ -19,15 +19,16 @@ const rootDir = path.resolve(__dirname, '..');
 const clientDist = path.join(rootDir, 'client', 'dist');
 const adminDist = path.join(rootDir, 'admin-app', 'dist');
 
-// Ensure dist artifacts exist before mounting routes
+// Non-blocking build check to ensure immediate port binding on dev startup
 if (!fs.existsSync(clientDist) || !fs.existsSync(adminDist)) {
-  console.log('[Backend] Dist artifacts missing; triggering build...');
-  try {
-    execSync('npm run build', { cwd: rootDir, stdio: 'inherit' });
-    console.log('[Backend] Build completed successfully.');
-  } catch (err) {
-    console.warn('[Backend] Build warning:', err.message);
-  }
+  console.log('[Backend] Dist artifacts missing; triggering background build...');
+  exec('npm run build', { cwd: rootDir }, (err) => {
+    if (err) {
+      console.warn('[Backend] Background build notice:', err.message);
+    } else {
+      console.log('[Backend] Background build completed.');
+    }
+  });
 }
 
 const app = express();
@@ -91,10 +92,16 @@ app.use((err, req, res, _next) => {
     });
   }
 
-  console.error(`[Backend] ${req.method} ${req.path} failed:`, err.message);
-  return res.status(err.statusCode || err.status || 500).json({
+  const statusCode = err.statusCode || err.status || 500;
+  if (statusCode >= 500) {
+    console.error(`[Backend] ${req.method} ${req.path} failed:`, err.message);
+  } else {
+    console.warn(`[Backend] ${req.method} ${req.path} (${statusCode}):`, err.message);
+  }
+
+  return res.status(statusCode).json({
     success: false,
-    statusCode: err.statusCode || err.status || 500,
+    statusCode,
     message: err.message || 'Internal Server Error',
   });
 });

@@ -212,14 +212,14 @@ export default function Header() {
 
             {currentUser ? (
               <div className='flex items-center gap-2.5'>
-                <Link to='/profile' className='flex items-center' title='Profile Settings'>
+                <Link to='/partner' className='flex items-center' title='Partner Dashboard'>
                   <img
                     className='rounded-full h-8 w-8 object-cover border border-slate-200 ring-2 ring-transparent hover:ring-slate-900 transition'
                     src={
                       currentUser.photoURL ||
                       'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
                     }
-                    alt='profile'
+                    alt='partner profile'
                   />
                 </Link>
               </div>
@@ -229,14 +229,14 @@ export default function Header() {
           {/* Mobile Right Controls: Hamburger Toggle & Quick Dashboard */}
           <div className='flex md:hidden items-center gap-2 shrink-0'>
             {currentUser ? (
-              <Link to='/profile' className='flex items-center' title='Profile Settings'>
+              <Link to='/partner' className='flex items-center' title='Partner Dashboard'>
                 <img
                   className='rounded-full h-7 w-7 object-cover border border-slate-200'
                   src={
                     currentUser.photoURL ||
                     'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
                   }
-                  alt='profile'
+                  alt='partner profile'
                 />
               </Link>
             ) : null}
@@ -314,19 +314,12 @@ export default function Header() {
 
                 <div className='flex items-center gap-1.5'>
                   <Link
-                    to='/dashboard'
+                    to='/partner'
                     onClick={() => setMobileMenuOpen(false)}
-                    className='px-2.5 py-1 text-xs font-bold bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition shrink-0 flex items-center gap-1 shadow-xs'
+                    className='px-3 py-1.5 text-xs font-bold bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition shrink-0 flex items-center gap-1.5 shadow-xs'
                   >
-                    <FaSuitcaseRolling className='text-amber-400 text-[10px]' />
-                    <span>Dashboard</span>
-                  </Link>
-                  <Link
-                    to='/profile'
-                    onClick={() => setMobileMenuOpen(false)}
-                    className='px-2 py-1 text-xs font-semibold bg-white text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-100 transition shrink-0'
-                  >
-                    {t('header.profile')}
+                    <FaSuitcaseRolling className='text-amber-400 text-xs' />
+                    <span>Partner Dashboard</span>
                   </Link>
                 </div>
               </div>
@@ -337,8 +330,16 @@ export default function Header() {
                   <span>{t('header.welcome')}</span>
                 </div>
                 <p className='text-[11px] text-slate-500 leading-relaxed'>
-                  {t('header.welcomeDesc')}
+                  List your boutique guest house or chauffeur car fleet on chento 100.
                 </p>
+                <Link
+                  to='/partner'
+                  onClick={() => setMobileMenuOpen(false)}
+                  className='inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-black text-white rounded-lg hover:bg-neutral-800 transition mt-1 shadow-xs'
+                >
+                  <FaPlus className='text-[10px]' />
+                  <span>Partner with Us</span>
+                </Link>
               </div>
             )}
           </div>
