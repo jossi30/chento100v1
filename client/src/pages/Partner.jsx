@@ -42,7 +42,7 @@ export default function Partner() {
   }, [currentUser]);
 
   // Auth Mode: 'register' | 'signin'
-  const [authMode, setAuthMode] = useState('register');
+  const [authMode, setAuthMode] = useState('signin');
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState('');
 
@@ -76,7 +76,7 @@ export default function Partner() {
   };
 
   // Fetch partner listings
-  const loadUserListings = useCallback(async () => {
+  const loadUserListings = useCallback(async (silent = false) => {
     if (!currentUser) {
       setListings([]);
       return;
@@ -85,7 +85,7 @@ export default function Partner() {
     if (!uid) return;
 
     try {
-      setLoadingListings(true);
+      if (!silent) setLoadingListings(true);
       const data = await getUserListings(uid);
       setListings(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -93,13 +93,20 @@ export default function Partner() {
       // Fallback empty array
       setListings([]);
     } finally {
-      setLoadingListings(false);
+      if (!silent) setLoadingListings(false);
     }
   }, [currentUser]);
 
   useEffect(() => {
+    if (!currentUser) {
+      loadUserListings();
+      return undefined;
+    }
+
     loadUserListings();
-  }, [loadUserListings]);
+    const refreshInterval = setInterval(() => loadUserListings(true), 30000);
+    return () => clearInterval(refreshInterval);
+  }, [currentUser, loadUserListings]);
 
   // Stats Counters
   const stats = useMemo(() => {
@@ -179,17 +186,13 @@ export default function Partner() {
     }
   };
 
-  // 1-Click Demo Testing Sign In for Partner Host or Platform Admin
-  const handleDemoLogin = async (role = 'partner') => {
+  // 1-Click Demo Testing Sign In for Partner Host
+  const handleDemoLogin = async () => {
     setAuthError('');
     setAuthLoading(true);
     try {
-      await loginDemo(role);
-      showToast(
-        role === 'admin'
-          ? 'Signed in as Platform Administrator (Joe Patriot)! Full admin controls enabled.'
-          : 'Signed in as Verified Partner Host (Alexander Vance)! Welcome back.'
-      );
+      await loginDemo('partner');
+      showToast('Signed in as Verified Partner Host (Alexander Vance)! Welcome back.');
     } catch (err) {
       setAuthError(err.message || 'Demo sign in failed.');
     } finally {
@@ -374,7 +377,7 @@ export default function Partner() {
                       </a>
                       <button
                         type='button'
-                        onClick={() => handleDemoLogin('partner')}
+                        onClick={handleDemoLogin}
                         className='inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-neutral-800 bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 transition cursor-pointer'
                       >
                         <span>🏡 Switch to Partner Host</span>
@@ -383,15 +386,15 @@ export default function Partner() {
                   ) : (
                     <button
                       type='button'
-                      onClick={() => handleDemoLogin('admin')}
-                      className='inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 border border-amber-300 transition cursor-pointer'
+                      onClick={handleDemoLogin}
+                      className='inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-neutral-800 bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 transition cursor-pointer'
                     >
-                      <span>🛡️ Switch to Demo Admin</span>
+                      <span>🏡 Demo Partner (Host)</span>
                     </button>
                   )}
                   <button
                     type='button'
-                    onClick={loadUserListings}
+                    onClick={() => loadUserListings()}
                     className='inline-flex items-center gap-1 px-3 py-1.5 rounded-xl font-semibold text-neutral-600 hover:text-black bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 transition cursor-pointer'
                     title='Refresh listings'
                   >
@@ -571,7 +574,14 @@ export default function Partner() {
                         ? '/images/kampala_apartment_living.jpg'
                         : '/images/kampala_city_sedan.jpg');
                     const isAvailable = item.active !== false && item.isActive !== false;
-                    const isApproved = item.status === 'approved' || Boolean(item.isApproved);
+                    const status = item.status || (item.isApproved ? 'approved' : 'pending');
+                    const isApproved = status === 'approved';
+                    const statusLabel =
+                      status === 'approved'
+                        ? 'Approved & Live'
+                        : status === 'rejected'
+                          ? 'Rejected'
+                          : 'Pending Review';
 
                     return (
                       <div
@@ -594,20 +604,27 @@ export default function Partner() {
                                 className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                                   isApproved
                                     ? 'bg-emerald-500 text-white'
-                                    : 'bg-amber-400 text-amber-950 font-black'
+                                    : status === 'rejected'
+                                      ? 'bg-rose-500 text-white'
+                                      : 'bg-amber-400 text-amber-950 font-black'
                                 }`}
                               >
-                                {isApproved ? 'Approved & Live' : 'Pending Review'}
+                                {statusLabel}
                               </span>
                             </div>
 
                             <button
                               type='button'
-                              disabled={updatingId === item.id}
+                              disabled={!isApproved || updatingId === item.id}
                               onClick={() => handleToggleAvailability(item)}
-                              className='absolute bottom-3 right-3 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md bg-white/95 text-neutral-900 shadow-sm cursor-pointer hover:bg-white transition flex items-center gap-1.5'
+                              className='absolute bottom-3 right-3 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md bg-white/95 text-neutral-900 shadow-sm cursor-pointer hover:bg-white transition flex items-center gap-1.5 disabled:cursor-not-allowed disabled:opacity-70'
                             >
-                              {isAvailable ? (
+                              {!isApproved ? (
+                                <>
+                                  <FaClock className='text-amber-500' />
+                                  <span>{status === 'rejected' ? 'Not approved' : 'Awaiting approval'}</span>
+                                </>
+                              ) : isAvailable ? (
                                 <>
                                   <FaToggleOn className='text-emerald-500 text-base' />
                                   <span>Available</span>
@@ -696,6 +713,7 @@ export default function Partner() {
                   <div className='divide-y divide-neutral-100'>
                     {listings.map((item) => {
                       const isAvailable = item.active !== false && item.isActive !== false;
+                      const isApproved = item.status === 'approved' || Boolean(item.isApproved);
                       return (
                         <div
                           key={item.id}
@@ -716,15 +734,20 @@ export default function Partner() {
 
                           <button
                             type='button'
-                            disabled={updatingId === item.id}
+                            disabled={!isApproved || updatingId === item.id}
                             onClick={() => handleToggleAvailability(item)}
-                            className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-2xs ${
+                            className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-2xs disabled:cursor-not-allowed disabled:opacity-70 ${
                               isAvailable
                                 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
                                 : 'bg-neutral-100 text-neutral-600 border border-neutral-200 hover:bg-neutral-200'
                             }`}
                           >
-                            {isAvailable ? (
+                            {!isApproved ? (
+                              <>
+                                <FaClock className='text-amber-500' />
+                                <span>Available after approval</span>
+                              </>
+                            ) : isAvailable ? (
                               <>
                                 <FaCheckCircle className='text-emerald-600' />
                                 <span>Available for Inquiries</span>
@@ -827,20 +850,6 @@ export default function Partner() {
                     <button
                       type='button'
                       onClick={() => {
-                        setAuthMode('register');
-                        setAuthError('');
-                      }}
-                      className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                        authMode === 'register'
-                          ? 'bg-black text-white shadow-xs'
-                          : 'text-neutral-600 hover:text-black'
-                      }`}
-                    >
-                      Register
-                    </button>
-                    <button
-                      type='button'
-                      onClick={() => {
                         setAuthMode('signin');
                         setAuthError('');
                       }}
@@ -852,6 +861,20 @@ export default function Partner() {
                     >
                       Sign In
                     </button>
+                    <button
+                      type='button'
+                      onClick={() => {
+                        setAuthMode('register');
+                        setAuthError('');
+                      }}
+                      className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                        authMode === 'register'
+                          ? 'bg-black text-white shadow-xs'
+                          : 'text-neutral-600 hover:text-black'
+                      }`}
+                    >
+                      Register
+                    </button>
                   </div>
                 </div>
 
@@ -862,7 +885,7 @@ export default function Partner() {
                   </div>
                 )}
 
-                {/* 1-Click Demo Testing Sign In for Partner Host & Platform Admin */}
+                {/* 1-Click Demo Testing Sign In for Partner Host */}
                 <div className='p-4 rounded-2xl bg-amber-50/80 border border-amber-200/90 space-y-2.5 shadow-2xs'>
                   <div className='flex items-center justify-between'>
                     <span className='text-[11px] font-bold uppercase tracking-wider text-amber-900 flex items-center gap-1.5'>
@@ -874,28 +897,18 @@ export default function Partner() {
                     </span>
                   </div>
                   <p className='text-xs text-amber-800/90 leading-relaxed'>
-                    Test the partner and administrative portals without needing passwords or verification:
+                    Test the partner portal without needing passwords or verification:
                   </p>
-                  <div className='grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1'>
+                  <div className='pt-1'>
                     <button
                       type='button'
                       id='partner-demo-host-btn'
                       disabled={authLoading}
                       onClick={() => handleDemoLogin('partner')}
-                      className='py-2.5 px-3 bg-neutral-900 hover:bg-black active:bg-neutral-800 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-xs cursor-pointer disabled:opacity-60'
+                      className='w-full py-2.5 px-3 bg-neutral-900 hover:bg-black active:bg-neutral-800 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-xs cursor-pointer disabled:opacity-60'
                     >
                       <span className='text-sm'>🏡</span>
                       <span>Demo Partner (Host)</span>
-                    </button>
-                    <button
-                      type='button'
-                      id='partner-demo-admin-btn'
-                      disabled={authLoading}
-                      onClick={() => handleDemoLogin('admin')}
-                      className='py-2.5 px-3 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-xs cursor-pointer disabled:opacity-60'
-                    >
-                      <span className='text-sm'>🛡️</span>
-                      <span>Demo Admin</span>
                     </button>
                   </div>
                 </div>

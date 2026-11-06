@@ -246,26 +246,10 @@ export async function getFeaturedListings(type = null, limitCount = 6) {
 export async function getOfferListings(limitCount = 8) {
   const listings = await fetchApiListings({ onlyApproved: true, limit: 500 });
   const combined = listings.map((item) => normalizeClientListing(item));
-  let list = combined.filter((item) => {
+  const list = combined.filter((item) => {
     if (item.status !== 'approved' || item.active === false || item.isActive === false) return false;
-    return Boolean(
-      item.offer ||
-      (Number(item.discountPrice) > 0 && Number(item.discountPrice) < Number(item.regularPrice)) ||
-      item.featured
-    );
+    return Boolean(item.offer || item.featured);
   });
-
-  // If fewer than 4 offer listings, backfill with approved listings
-  if (list.length < 4) {
-    const fallback = combined.filter(
-      (item) => item.status === 'approved' && item.active !== false && item.isActive !== false
-    );
-    fallback.forEach((f) => {
-      if (!list.find((x) => x.id === f.id)) {
-        list.push({ ...f, offer: true });
-      }
-    });
-  }
 
   return list.slice(0, limitCount);
 }

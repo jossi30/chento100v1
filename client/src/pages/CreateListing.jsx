@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { createListing } from '../services/listingService';
@@ -10,11 +10,14 @@ import CameraCaptureModal from '../components/CameraCaptureModal';
 export default function CreateListing() {
   const { t } = useLanguage();
   const reduxUser = useSelector((state) => state.user.currentUser);
-  const { currentUser: authUser, isEmailVerified, isAdmin } = useAuth();
+  const { currentUser: authUser, userProfile, isAdmin } = useAuth();
   const currentUser = authUser || reduxUser;
-  const navigate = useNavigate();
+  const location = useLocation();
+  const requestedType = new URLSearchParams(location.search).get('type');
+  const initialCategory =
+    requestedType === 'car' || requestedType === 'car_service' ? 'car_service' : 'guesthouse';
 
-  const [category, setCategory] = useState('guesthouse'); // 'guesthouse' | 'car_service'
+  const [category, setCategory] = useState(initialCategory); // 'guesthouse' | 'car_service'
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [submittedListing, setSubmittedListing] = useState(null);
@@ -24,7 +27,7 @@ export default function CreateListing() {
     title: '',
     description: '',
     location: '',
-    regularPrice: '120',
+    regularPrice: initialCategory === 'car_service' ? '75' : '120',
     discountPrice: '',
     offer: false,
     isApproved: Boolean(isAdmin),
@@ -174,11 +177,6 @@ export default function CreateListing() {
       return;
     }
 
-    if (!isEmailVerified && !isAdmin) {
-      setError('Email verification required: You must verify your email address before publishing listings.');
-      return;
-    }
-
     if (!formData.title.trim()) {
       setError('Please provide a listing title.');
       return;
@@ -213,6 +211,7 @@ export default function CreateListing() {
         location: formData.location.trim(),
         address: formData.location.trim(),
         city: formData.location.trim().split(',')[0].trim() || 'Makindye',
+        contactPhone: userProfile?.phone || currentUser?.phoneNumber || currentUser?.phone || '',
         regularPrice: Number(formData.regularPrice),
         price: Number(formData.regularPrice),
         discountPrice: formData.discountPrice ? Number(formData.discountPrice) : 0,
@@ -262,7 +261,7 @@ export default function CreateListing() {
       title: '',
       description: '',
       location: '',
-      regularPrice: '120',
+      regularPrice: category === 'car_service' ? '75' : '120',
       discountPrice: '',
       offer: false,
       isApproved: Boolean(isAdmin),
@@ -303,24 +302,6 @@ export default function CreateListing() {
           Back to Partner Dashboard
         </Link>
       </div>
-
-      {/* Email Verification Warning Banner */}
-      {!isEmailVerified && !isAdmin && (
-        <div className='mb-6 p-4 bg-amber-50 border border-amber-300 rounded-2xl text-amber-900 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs'>
-          <div>
-            <p className='font-bold text-sm text-amber-950 mb-0.5'>Email Verification Required</p>
-            <p className='text-amber-800'>
-              You must verify your email address ({currentUser?.email}) before publishing guest houses or car leasing listings.
-            </p>
-          </div>
-          <Link
-            to='/verify-email'
-            className='shrink-0 inline-flex items-center justify-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg transition shadow-xs'
-          >
-            Verify Email Now →
-          </Link>
-        </div>
-      )}
 
       {/* Success Notification */}
       {submittedListing && (
@@ -1014,7 +995,7 @@ export default function CreateListing() {
             </Link>
             <button
               type='submit'
-              disabled={loading || (!isEmailVerified && !isAdmin)}
+              disabled={loading}
               className='inline-flex items-center gap-2 px-6 py-2.5 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'
             >
               {loading && (

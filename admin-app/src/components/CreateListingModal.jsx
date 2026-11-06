@@ -16,6 +16,7 @@ export default function CreateListingModal({ isOpen, onClose, onCreated, authHea
     regularPrice: '',
     discountPrice: '',
     offer: false,
+    featured: false,
     isApproved: true,
     active: true,
     // Guesthouse
@@ -416,7 +417,7 @@ export default function CreateListingModal({ isOpen, onClose, onCreated, authHea
           </div>
 
           {/* Pricing Row */}
-          <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200'>
             <div>
               <label className='block text-xs font-semibold text-slate-700 mb-1'>
                 Regular Rate ($ {category === 'guesthouse' ? '/night' : '/day'}) <span className='text-rose-500'>*</span>
@@ -448,20 +449,30 @@ export default function CreateListingModal({ isOpen, onClose, onCreated, authHea
               />
             </div>
 
-            <div className='flex items-center sm:pt-6'>
-              <label className='inline-flex items-center gap-2 cursor-pointer'>
-                <input
-                  type='checkbox'
-                  name='offer'
-                  checked={formData.offer}
-                  onChange={handleChange}
-                  className='w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500'
-                />
-                <span className='text-xs font-semibold text-slate-700'>
-                  Display Special Deal Badge
-                </span>
-              </label>
-            </div>
+            <label className='flex items-start gap-2 cursor-pointer'>
+              <input
+                type='checkbox'
+                name='featured'
+                checked={formData.featured}
+                onChange={handleChange}
+                className='mt-0.5 w-4 h-4 text-amber-600 rounded border-slate-300 focus:ring-amber-500'
+              />
+              <span className='text-xs font-semibold text-slate-700'>
+                Top listing <span className='block text-[10px] text-slate-500'>Show in the home page slideshow</span>
+              </span>
+            </label>
+            <label className='flex items-start gap-2 cursor-pointer'>
+              <input
+                type='checkbox'
+                name='offer'
+                checked={formData.offer}
+                onChange={handleChange}
+                className='mt-0.5 w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500'
+              />
+              <span className='text-xs font-semibold text-slate-700'>
+                Offer <span className='block text-[10px] text-slate-500'>Show in the home page slideshow</span>
+              </span>
+            </label>
           </div>
 
           {/* Category-Specific Fields */}

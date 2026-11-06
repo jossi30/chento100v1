@@ -50,6 +50,8 @@ export default function EditListingModal({
         ownerEmail: listing.ownerEmail || '',
         status: listing.status || 'approved',
         active: listing.active !== false && listing.isActive !== false,
+        featured: Boolean(listing.featured),
+        offer: Boolean(listing.offer),
         images: Array.isArray(listing.images) && listing.images.length > 0
           ? [...listing.images]
           : Array.isArray(listing.imageUrls) && listing.imageUrls.length > 0
@@ -257,6 +259,39 @@ export default function EditListingModal({
                 <option value='false'>Hidden / Paused</option>
               </select>
             </div>
+          </div>
+
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-amber-50/70 border border-amber-200 rounded-2xl'>
+            <label className='flex items-start gap-2.5 cursor-pointer font-bold text-slate-800'>
+              <input
+                type='checkbox'
+                name='featured'
+                checked={formData.featured}
+                onChange={handleChange}
+                className='mt-0.5 rounded text-amber-600 focus:ring-amber-500'
+              />
+              <span>
+                Top listing
+                <span className='block mt-0.5 text-[11px] font-normal text-slate-600'>
+                  Show in the client home page slideshow.
+                </span>
+              </span>
+            </label>
+            <label className='flex items-start gap-2.5 cursor-pointer font-bold text-slate-800'>
+              <input
+                type='checkbox'
+                name='offer'
+                checked={formData.offer}
+                onChange={handleChange}
+                className='mt-0.5 rounded text-emerald-600 focus:ring-emerald-500'
+              />
+              <span>
+                Offer
+                <span className='block mt-0.5 text-[11px] font-normal text-slate-600'>
+                  Show in the client home page slideshow.
+                </span>
+              </span>
+            </label>
           </div>
 
           {/* Basic Details */}

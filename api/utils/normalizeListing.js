@@ -16,7 +16,7 @@ export const normalizeListing = (data, id) => {
   const price = data.price !== undefined ? Number(data.price) : regularPrice;
   const discountPrice = Number(data.discountPrice || data.discountedPrice || 0);
   const discountedPrice = discountPrice;
-  const offer = data.offer !== undefined ? Boolean(data.offer) : Boolean(discountPrice > 0 && discountPrice < regularPrice);
+  const offer = Boolean(data.offer);
 
   let category = data.category;
   if (!category) {

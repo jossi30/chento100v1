@@ -225,6 +225,10 @@ const listingSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    featured: {
+      type: Boolean,
+      default: false,
+    },
     amenities: {
       type: Array,
       default: [],
